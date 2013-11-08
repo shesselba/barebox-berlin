@@ -45,6 +45,15 @@ config ARCH_BCM2835
 	select CLOCKSOURCE_BCM2835
 	select ARM_AMBA
 
+config ARCH_BERLIN
+	bool "Marvell Berlin"
+	select COMMON_CLK
+	select COMMON_CLK_OF_PROVIDER
+	select CLKDEV_LOOKUP
+	select GPIOLIB
+	select HAS_DEBUG_LL
+	select OFTREE
+
 config ARCH_CLPS711X
 	bool "Cirrus Logic EP711x/EP721x/EP731x"
 	select CLKDEV_LOOKUP
@@ -185,6 +194,7 @@ endchoice
 source arch/arm/cpu/Kconfig
 source arch/arm/mach-at91/Kconfig
 source arch/arm/mach-bcm2835/Kconfig
+source arch/arm/mach-berlin/Kconfig
 source arch/arm/mach-clps711x/Kconfig
 source arch/arm/mach-ep93xx/Kconfig
 source arch/arm/mach-highbank/Kconfig

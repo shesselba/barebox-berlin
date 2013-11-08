@@ -1,4 +1,5 @@
 # keep sorted by CONFIG_* macro name.
+obj-$(CONFIG_ARCH_BERLIN)			+= berlin-generic/
 obj-$(CONFIG_MACH_ANIMEO_IP)			+= animeo_ip/
 obj-$(CONFIG_MACH_ARCHOSG9)			+= archosg9/
 obj-$(CONFIG_MACH_AT91SAM9260EK)		+= at91sam9260ek/
