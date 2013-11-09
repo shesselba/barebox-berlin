@@ -4,13 +4,15 @@
  * Under GPLv2
  */
 
+#include <clock.h>
 #include <common.h>
 #include <errno.h>
 #include <init.h>
-#include <clock.h>
+#include <gpio.h>
 #include <gpio_keys.h>
 #include <poller.h>
-#include <gpio.h>
+#include <of.h>
+#include <of_gpio.h>
 
 static inline struct gpio_keys_platform_data *
 poller_to_gk_pdata(struct poller_struct *poller)
@@ -59,14 +61,67 @@ static int gpio_keys_getc(struct console_device *cdev)
 	return code;
 }
 
+#if defined(CONFIG_KEYBOARD_GPIO_OF)
+static int __init gpio_keys_of_probe(struct device_d *dev)
+{
+	struct device_node *child;
+	struct gpio_keys_platform_data *pdata;
+	struct gpio_keys_button *b;
+	u32 nbuttons = of_get_child_count(dev->device_node);
+
+	if (!nbuttons)
+		return -EINVAL;
+
+	pdata = xzalloc(sizeof(*pdata) + nbuttons * sizeof(*b));
+	pdata->nbuttons = nbuttons;
+	pdata->buttons = (struct gpio_keys_button *)(pdata + 1);
+
+	b = pdata->buttons;
+	for_each_child_of_node(dev->device_node, child) {
+		enum of_gpio_flags flags;
+
+		b->gpio = of_get_named_gpio_flags(child, "gpios", 0, &flags);
+		if (b->gpio < 0) {
+			dev_err(dev, "unable to parse gpio/flags for %s",
+				child->full_name);
+			return -EINVAL;
+		}
+		b->active_low = !!(flags & OF_GPIO_ACTIVE_LOW);
+
+		if (of_property_read_u32(child, "linux,code", &b->code)) {
+			dev_err(dev, "button without keycode for %s",
+				child->full_name);
+			return -EINVAL;
+		}
+
+		b++;
+	}
+
+	dev->platform_data = pdata;
+	return 0;
+}
+#else
+static int __init gpio_keys_of_probe(struct device_d *dev)
+{
+	return 0;
+}
+#endif
+
 static int __init gpio_keys_probe(struct device_d *dev)
 {
 	int ret, i, gpio;
 	struct gpio_keys_platform_data *pdata;
 	struct console_device *cdev;
 
-	pdata = dev->platform_data;
+	if (!dev->platform_data && dev->device_node) {
+		ret = gpio_keys_of_probe(dev);
+		if (ret) {
+			dev_err(dev, "failed to parse gpios from DT\n");
+			return ret;
+		}
+	}
 
+	pdata = dev->platform_data;
 	if (!pdata) {
 		/* small (so we copy it) but critical! */
 		pr_err("missing platform_data\n");
@@ -103,8 +158,14 @@ static int __init gpio_keys_probe(struct device_d *dev)
 	return poller_register(&pdata->poller);
 }
 
+static struct of_device_id gpio_keys_of_ids[] = {
+	{ .compatible = "gpio-keys", },
+	{ }
+};
+
 static struct driver_d gpio_keys_driver = {
 	.name	= "gpio_keys",
 	.probe	= gpio_keys_probe,
+	.of_compatible = DRV_OF_COMPAT(gpio_keys_of_ids),
 };
 device_platform_driver(gpio_keys_driver);

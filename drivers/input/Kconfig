@@ -17,6 +17,10 @@ config KEYBOARD_GPIO
 	  setup logic must also provide a platform device,
 	  with configuration data saying which GPIOs are used.
 
+config KEYBOARD_GPIO_OF
+	bool "support parsing GPIO buttons from device tree"
+	depends on KEYBOARD_GPIO && OFTREE
+
 config KEYBOARD_IMX_KEYPAD
 	bool "IMX Keypad"
 	depends on ARCH_IMX
