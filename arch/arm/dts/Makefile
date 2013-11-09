@@ -1,3 +1,6 @@
+dtb-$(CONFIG_ARCH_BERLIN) += \
+	berlin2-sony-nsz-gs7.dtb \
+	berlin2cd-google-chromecast.dtb
 dtb-$(CONFIG_ARCH_IMX51) += imx51-babbage.dtb \
 	imx51-genesi-efika-sb.dtb
 dtb-$(CONFIG_ARCH_IMX53) += imx53-qsb.dtb

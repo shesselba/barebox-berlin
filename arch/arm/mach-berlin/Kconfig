@@ -1,0 +1,48 @@
+if ARCH_BERLIN
+
+config ARCH_TEXT_BASE
+	hex
+	default 0x01000000
+
+config BUILTIN_DTB_NAME
+	string
+	default "berlin2-sony-nsz-gs7" if MACH_SONY_NSZ_GS7
+	default "berlin2cd-google-chromecast" if MACH_GOOGLE_CHROMECAST
+
+choice
+	prompt "Marvell Berlin SoCs"
+
+config ARCH_BERLIN_BG2
+	bool "Armada 1500 (BG2)"
+	select ARM_SMP_TWD
+	select CPU_V7
+
+config ARCH_BERLIN_BG2CD
+	bool "Armada 1500-mini (BG2CD)"
+	select ARM_SMP_TWD
+	select CPU_V7
+
+endchoice
+
+choice
+	prompt "Marvell Berlin SoC board"
+
+#
+# Armada 1500 (BG2) SoC boards
+#
+
+config MACH_SONY_NSZ_GS7
+	bool "Sony NSZ-GS7"
+	depends on ARCH_BERLIN_BG2
+
+#
+# Armada 1500-mini (BG2CD) SoC boards
+#
+
+config MACH_GOOGLE_CHROMECAST
+	bool "Google Chromecast"
+	depends on ARCH_BERLIN_BG2CD
+
+endchoice
+
+endif # ARCH_BERLIN
