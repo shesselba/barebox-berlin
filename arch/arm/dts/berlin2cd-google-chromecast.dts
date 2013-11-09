@@ -40,6 +40,16 @@
 			barebox,default-trigger = "heartbeat";
 		};
 	};
+
+	buttons {
+		compatible = "gpio-keys";
+
+		recovery {
+			label = "recovery";
+			gpios = <&gpio0 6 1>;
+			linux,code = <0x100>;
+		};
+	};
 };
 
 &uart0 { status = "okay"; };
